@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "funcoes_validacao.h" // Header que contem as funções de validação, deixei em aspas pra diferenciar dos include da lib de C
 
 int lerCsv(const char *arquivo){
     char S[50];
