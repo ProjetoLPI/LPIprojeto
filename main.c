@@ -17,7 +17,7 @@ int main() {
         if(n == 1){
 
             //esse arquivo foi cortado para facilitar nos testes
-            const char *nomeArquivo = "RespostaFormulario1TESTE.csv";
+            const char *nomeArquivo = "RespostaFormulario1.csv";
             validador_de_CEP(nomeArquivo);
 
         }
