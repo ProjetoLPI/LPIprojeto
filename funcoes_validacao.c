@@ -73,7 +73,7 @@ int testCsv(const char *arquivo) {
     FILE *arquivocsv = fopen(arquivo, "r");
     if (arquivocsv == NULL) {
         perror("Erro ao abrir o arquivo");
-        return -1; // Return an error code
+        return -1; 
     }
 
     //looping pra percorrer as linhas
