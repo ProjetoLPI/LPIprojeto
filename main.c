@@ -7,11 +7,12 @@
 
 int main() {
 
+
     int i = 0;
 
     while(i == 0){
         int n;
-        printf(" 1 - VALIDAR CEP\n 2 - Sair do Programa ");
+        printf(" 1 - VALIDAR CEP\n 2 - test ");
         scanf("%d", &n);
 
         if(n == 1){
@@ -20,6 +21,10 @@ int main() {
             const char *nomeArquivo = "RespostaFormulario1.csv";
             validador_de_CEP(nomeArquivo);
 
+        }
+        else if(n == 2){
+            const char *nomeArquivo = "tempo.csv";
+            testCsv(nomeArquivo);
         }
         else{
             i = 1;
