@@ -3,7 +3,8 @@
 #include <string.h>
 #include "funcoes_validacao.c" // Header que contem as funções de validação, deixei em aspas pra diferenciar dos include da lib de C
 
-
+//EXECUTE O MAIN PARA TESTAR AS FUNÇÕES DE VALIDAÇÃO
+//O MAIN PUXA AS FUNÇÕES
 
 int main() {
 
@@ -17,14 +18,12 @@ int main() {
 
         if(n == 1){
 
-            //esse arquivo foi cortado para facilitar nos testes
-            const char *nomeArquivo = "RespostaFormulario1.csv";
-            validador_de_CEP(nomeArquivo);
+            const char *nomeArquivo = "RespostaFormulario1TESTE.csv";
+            ValidarNulo(nomeArquivo);
 
         }
         else if(n == 2){
-            const char *nomeArquivo = "tempo.csv";
-            testCsv(nomeArquivo);
+            //adcionar outra validações
         }
         else{
             i = 1;
