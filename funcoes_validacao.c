@@ -49,7 +49,7 @@ int ValidarNulo(const char *arquivo)
         // Processo de extração de cada coluna
         int indiceColunas = 0;
         int dataReconhecida = 0;
-        int colunasNulas[50]; // Assumindo um máximo de 50 colunas
+        int colunasNulas[100]; // Assumindo um máximo de 50 colunas
         int nc = 0;
 
         // Verificar se a primeira coluna está no formato de data e hora
