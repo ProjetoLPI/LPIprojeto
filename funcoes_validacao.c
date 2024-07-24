@@ -4,7 +4,7 @@
 #include <gtk/gtk.h>
 #include <ctype.h>
 
-// Função auxiliar para verificar se uma string está no formato de data e hora
+// dd/mm/aaaa 00:00:00 - verifica os primeiros objetos das colunas
 int VerificarDataHora(const char *str)
 {
     int mes, dia, ano, hora, minuto, segundo;
@@ -20,9 +20,25 @@ int VerificarDataHora(const char *str)
     return 0;
 }
 
+//Carimbo de data/hora - verifica o primeiro objeto da primeira coluna
 
-//essa função vai dentro da outra
+int VerificarDataHora2(const char *str)
+{
+    if (strcmp(str, "Carimbo de data/hora") == 0)
+    {
+        printf("carimbo data encontrado");
+        return 1;
+    }
+    return 0;
+}
+
+
+//essa função vai dentro de ValidarCEP
 int validarCEP(const char *cep) {
+    if (cep == NULL || strlen(cep) == 0) {
+        return 1;  // Tratar CEP vazio como válido
+    }
+
     int comprimento = 0;
     char cep_limpo[9];  // 8 dígitos + 1 terminador nulo
     int j = 0;
@@ -52,8 +68,6 @@ int validarCEP(const char *cep) {
 }
 
 
-
-// PODEMOS USAR COMO BASE PARA QUALQUER TIPO DE VALIDAÇÃO
 // PODEMOS USAR COMO BASE PARA QUALQUER TIPO DE VALIDAÇÃO
 int ValidarNulo(gchar *arquivo)
 {
@@ -156,29 +170,113 @@ int ValidarNulo(gchar *arquivo)
     return 0;
 }
 
+//utiliza VerificarDataHora2 e tem a função de encontrar o indice do CEP no arquivo
+//problema encontrado: as primeiras linhas do cabeçalho estao quebradas, entao precisa fzr ele n parar de contar
+int EncontrarCEP(const char *arquivo) {
+    if (arquivo == NULL) {
+        printf("Nenhum arquivo selecionado\n");
+        return -1;
+    }
 
-//função para usar no gtk
-int ValidarCEP(gchar *global_caminho)
+    char lendo;
+    char linhasCsv[10024];
+    int indiceCEP = -1;
+    int dataReconhecida = 0;
+    int indiceColunas = 1;  // Inicializa fora do loop para manter a contagem
+
+    FILE *arquivocsv = fopen(arquivo, "r");
+    if (arquivocsv == NULL) {
+        perror("Erro ao abrir o arquivo");
+        return -1;
+    }
+
+    // Looping to read lines
+    while ((lendo = fgetc(arquivocsv)) != EOF) {
+        int i = 0;
+        indiceColunas--;
+
+        // Adding characters to the line buffer
+        while (lendo != '\n' && lendo != EOF) {
+            linhasCsv[i++] = lendo;
+            lendo = fgetc(arquivocsv);
+        }
+        linhasCsv[i] = '\0';  // Null-terminating the string
+
+        // Extracting columns
+        if (!dataReconhecida) {
+            char primeiraColuna[100];
+            sscanf(linhasCsv, "%99[^;]", primeiraColuna);
+
+            if (VerificarDataHora2(primeiraColuna)) {
+                dataReconhecida = 1;
+            }
+        }
+
+        // Processing columns if the date is recognized
+        if (dataReconhecida) {
+            char colunasCsv[1024];
+            int j = 0;
+
+            for (int k = 0; k <= i; k++) {
+                // If delimiter ';' or end of line '\0' is found
+                if (linhasCsv[k] == ';' || linhasCsv[k] == '\0') {
+                    colunasCsv[j] = '\0';  // Null-terminating the string
+
+                    // Comparing strings ignoring special characters
+                    if (strstr(colunasCsv, "CEP da Resid") != NULL) {
+                        indiceCEP = indiceColunas;
+                        fclose(arquivocsv);
+                        return indiceCEP;  // Retornando o índice imediatamente ao encontrar
+                    }
+
+                    j = 0;  // Reset for the next column
+                    indiceColunas++;
+                } else {
+                    // Adding elements to the column buffer
+                    colunasCsv[j++] = linhasCsv[k];
+                }
+            }
+        }
+    }
+
+    fclose(arquivocsv);
+
+    return indiceCEP;  // Return -1 if not found
+}
+
+
+
+
+//essa função utiliza EncontrarCEP, validarCEP e VerificarDataHora
+int ValidarCEP(gchar *arquivo)
 {
-    if (global_caminho == NULL)
+    if (arquivo == NULL)
     {
         printf("Nenhum arquivo selecionado\n");
         return -1;
     }
     
-    char lendo;
-    char linhasCsv[10024];
-    int indiceLinhas = 0;
-    int indiceLinhasReconhecidas = 0;
-
-    gchar *arquivo = global_caminho;
-
     FILE *arquivocsv = fopen(arquivo, "r");
     if (arquivocsv == NULL)
     {
         perror("Erro ao abrir o arquivo");
         return -1;
     }
+
+    int indiceCep = EncontrarCEP(arquivo);
+    if (indiceCep == -1)
+    {
+        printf("Cabeçalho de CEP não encontrado\n");
+        fclose(arquivocsv);
+        return -1;
+    }
+
+    rewind(arquivocsv); // Reinicia a leitura do arquivo desde o início
+
+    char lendo;
+    char linhasCsv[10024];
+    int indiceLinhas = 0;
+    int indiceLinhasReconhecidas = 0;
 
     // Looping para percorrer as linhas
     while ((lendo = fgetc(arquivocsv)) != EOF)
@@ -220,7 +318,7 @@ int ValidarCEP(gchar *global_caminho)
                 {
                     colunasCsv[j] = '\0'; // Caracter final de cada string
 
-                    if (indiceColunas == 6) // Supondo que a coluna do CEP é a terceira (índice 2)
+                    if (indiceColunas == indiceCep) //indice da coluna cep
                     {
                         strcpy(cep, colunasCsv); // Copiar o CEP para o buffer
                         if (!validarCEP(colunasCsv))
@@ -256,8 +354,3 @@ int ValidarCEP(gchar *global_caminho)
 
     return 0;
 }
-
-
-
-
-
