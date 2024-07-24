@@ -4,8 +4,10 @@
 #include <gtk/gtk.h>
 #include "funcoes_validacao.c"
 
-gchar *global_caminho = NULL;
+//declarei a variável do caminho do arquivo
+gchar *arquivo = NULL;
 
+//função de escolher arquivo
 static void
 on_file_chosen(GtkFileChooser *chooser,
                gint            response_id)
@@ -20,13 +22,13 @@ on_file_chosen(GtkFileChooser *chooser,
       gchar *caminho = g_file_get_path(file);
       if (caminho)
       {
-        // Armazena o caminho na variável global
-        if (global_caminho)
-          g_free(global_caminho);
-        global_caminho = g_strdup(caminho);
+        // Armazena o caminho na variável arquivo
+        if (arquivo)
+          g_free(arquivo);
+        arquivo = g_strdup(caminho);
 
         // Imprime o diretório no console
-        g_print("Arquivo selecionado: %s\n", global_caminho);
+        g_print("Arquivo selecionado: %s\n", arquivo);
 
         g_free(caminho);
       }
@@ -54,12 +56,14 @@ show_file_dialog(GtkWindow *parent_window)
       NULL);
 
   gtk_window_set_transient_for(GTK_WINDOW(file_dialog), parent_window);
+//filtro de busca dos arquivos
 
+//filtro 1: csv
   GtkFileFilter *filtro1 = gtk_file_filter_new();
   gtk_file_filter_set_name(filtro1, "CSV files");
   gtk_file_filter_add_pattern(filtro1, "*.csv");
   gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_dialog), filtro1);
-
+//filtro 2: qualquer arquivo
   GtkFileFilter *filtro2 = gtk_file_filter_new();
   gtk_file_filter_set_name(filtro2, "Sem filtro");
   gtk_file_filter_add_pattern(filtro2, ".");
@@ -71,13 +75,13 @@ show_file_dialog(GtkWindow *parent_window)
   // Exibe o seletor de arquivos
   gtk_window_present(GTK_WINDOW(file_dialog));
 }
-
+//função para verificar se arquivo tem o diretório
 static void
 on_validate_button_clicked(GtkButton *button, gpointer user_data)
 {
-  if (global_caminho)
+  if (arquivo)
   {
-    ValidarNulo(global_caminho);
+    ValidarNulo(arquivo);
   }
   else
   {
@@ -93,6 +97,8 @@ activate (GtkApplication *app,
   GtkWidget *box;
   GtkWidget *button;
   GtkWidget *button2;
+  GtkWidget *label;
+  GtkWidget *show_file_button;
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "ProjetoLPI");
@@ -104,19 +110,26 @@ activate (GtkApplication *app,
   // Cria o botão para mostrar o seletor de arquivos
   button = gtk_button_new_with_label("Escolha o arquivo");
   gtk_box_append(GTK_BOX(box), button);
+  
 
-  // Conecta o sinal "clicked" do GtkButton para abrir o seletor de arquivos
-  g_signal_connect(button, "clicked", G_CALLBACK(show_file_dialog), window);
+
+  gchar *transferir = g_object_get_data(G_OBJECT(button), "button_content");
+  g_object_set_data(G_OBJECT(button2), "button_content", transferir);
+  gtk_button_set_label(GTK_BUTTON(button2), transferir);
 
   button2 = gtk_button_new_with_label("Validar campos nulos");
   gtk_box_append(GTK_BOX(box), button2);
 
-  // Conecta o sinal "clicked" do GtkButton para validar campos nulos
   g_signal_connect(button2, "clicked", G_CALLBACK(on_validate_button_clicked), NULL);
+
+
+
+  // Conecta o sinal "clicked" do GtkButton para abrir o seletor de arquivos
+  g_signal_connect(button, "clicked", G_CALLBACK(show_file_dialog), window);
 
   gtk_window_present(GTK_WINDOW(window));
 }
-
+//função main do gtk
 int
 main (int    argc,
       char **argv)

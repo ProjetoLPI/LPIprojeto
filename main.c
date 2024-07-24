@@ -19,7 +19,7 @@ int main() {
         if(n == 1){
 
             const char *nomeArquivo = "RespostaFormulario1.csv";
-            ValidarNulo(nomeArquivo);
+            ValidarCEP(nomeArquivo);
 
         }
         else if(n == 2){
