@@ -2,96 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
+#include "funcoes_validacao.c"
 
 gchar *global_caminho = NULL;
-int ValidarNulo()
-{
-    if (global_caminho == NULL)
-    {
-        printf("Nenhum arquivo selecionado\n");
-        return -1;
-    }
-
-    char lendo;
-    char linhasCsv[10024];
-    int indiceLinhas = 0;
-    gchar *arquivo = global_caminho;
-    
-    FILE *arquivocsv = fopen(arquivo, "r");
-    if (arquivocsv == NULL)
-    {
-        perror("Erro ao abrir o arquivo");
-        return -1;
-    }
-
-    // Looping para percorrer as linhas
-    while ((lendo = fgetc(arquivocsv)) != EOF)
-    {
-        int i = 0;
-
-        // Adicionando os caracteres da linha ao vetor
-        while (lendo != '\n' && lendo != EOF)
-        {
-            linhasCsv[i++] = lendo;
-            lendo = fgetc(arquivocsv);
-        }
-        linhasCsv[i] = '\0'; // Caracter final de cada string
-
-        // Processo de extração de cada coluna
-        int indiceColunas = 0;
-        int dataReconhecida = 0;
-
-        // Reconhecendo primeira coluna COMO : dd/mm/aaaa e 00:00:00 - os arquivos sao bugados, entao isso é necessario
-        for (int n = 0; n < i; n++)
-        {
-            if (linhasCsv[n] == '/' || linhasCsv[n] == ':')
-            {
-                dataReconhecida++;
-            }
-            else if (dataReconhecida == 4)
-            {
-                break;
-            }
-        }
-
-        // Se a data foi reconhecida, processar as colunas
-        if (dataReconhecida == 4)
-        {
-            for (int k = 0; k <= i; k++)
-            {
-                static char colunasCsv[1024];
-                static int j = 0;
-
-                // Caso ele reconheça o delimitador ';' ou o final da linha '\0'
-                if (linhasCsv[k] == ';' || linhasCsv[k] == '\0')
-                {
-                    colunasCsv[j] = '\0'; // Caracter final de cada string
-
-                    if (colunasCsv[0] == '\0')
-                    {
-                        printf("linha %d coluna %d vazia\n", indiceLinhas, indiceColunas);
-                    }
-
-                    j = 0; // Reseta para a próxima coluna
-                    indiceColunas++;
-                }
-                else
-                {
-                    // Adiciona os elementos na coluna
-                    colunasCsv[j++] = linhasCsv[k];
-                }
-            }
-        }
-
-        indiceLinhas++;
-    }
-
-    printf("Quantidade de linhas no arquivo: %d\n", indiceLinhas);
-
-    fclose(arquivocsv);
-
-    return 0;
-}
 
 static void
 on_file_chosen(GtkFileChooser *chooser,
@@ -160,6 +73,19 @@ show_file_dialog(GtkWindow *parent_window)
 }
 
 static void
+on_validate_button_clicked(GtkButton *button, gpointer user_data)
+{
+  if (global_caminho)
+  {
+    ValidarNulo(global_caminho);
+  }
+  else
+  {
+    g_print("Nenhum arquivo selecionado.\n");
+  }
+}
+
+static void
 activate (GtkApplication *app,
           gpointer        user_data)
 {
@@ -167,8 +93,6 @@ activate (GtkApplication *app,
   GtkWidget *box;
   GtkWidget *button;
   GtkWidget *button2;
-  GtkWidget *label;
-  GtkWidget *show_file_button;
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "ProjetoLPI");
@@ -180,22 +104,15 @@ activate (GtkApplication *app,
   // Cria o botão para mostrar o seletor de arquivos
   button = gtk_button_new_with_label("Escolha o arquivo");
   gtk_box_append(GTK_BOX(box), button);
-  
 
-
-  gchar *arquivo = g_object_get_data(G_OBJECT(button), "button_content");
-  g_object_set_data(G_OBJECT(button2), "button_content", arquivo);
-  gtk_button_set_label(GTK_BUTTON(button2), arquivo);
+  // Conecta o sinal "clicked" do GtkButton para abrir o seletor de arquivos
+  g_signal_connect(button, "clicked", G_CALLBACK(show_file_dialog), window);
 
   button2 = gtk_button_new_with_label("Validar campos nulos");
   gtk_box_append(GTK_BOX(box), button2);
 
-  g_signal_connect(button2, "clicked", G_CALLBACK(ValidarNulo), NULL);
-
-
-
-  // Conecta o sinal "clicked" do GtkButton para abrir o seletor de arquivos
-  g_signal_connect(button, "clicked", G_CALLBACK(show_file_dialog), window);
+  // Conecta o sinal "clicked" do GtkButton para validar campos nulos
+  g_signal_connect(button2, "clicked", G_CALLBACK(on_validate_button_clicked), NULL);
 
   gtk_window_present(GTK_WINDOW(window));
 }

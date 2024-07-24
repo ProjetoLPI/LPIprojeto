@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gtk/gtk.h>
 
 // Função auxiliar para verificar se uma string está no formato de data e hora
 int VerificarDataHora(const char *str)
@@ -19,12 +20,21 @@ int VerificarDataHora(const char *str)
 }
 
 // PODEMOS USAR COMO BASE PARA QUALQUER TIPO DE VALIDAÇÃO
-int ValidarNulo(const char *arquivo)
+int ValidarNulo(gchar *global_caminho)
 {
+
+    if (global_caminho == NULL)
+    {
+        printf("Nenhum arquivo selecionado\n");
+        return -1;
+    }
+    
     char lendo;
     char linhasCsv[10024];
     int indiceLinhas = 0;
     int indiceLinhasReconhecidas = 0;
+
+    gchar *arquivo = global_caminho;
 
     FILE *arquivocsv = fopen(arquivo, "r");
     if (arquivocsv == NULL)
