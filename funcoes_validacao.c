@@ -776,7 +776,7 @@ int ValidarCNS(gchar *arquivo) {
             }
 
             if (!cnsValido) { // Imprime apenas se o CNS for inválido
-                printf("linha: %d tem Numero da Carteira Nacional de Saude: %s inválido\n", indiceLinhasReconhecidas, cns);
+                printf("linha: %d tem Numero da Carteira Nacional de Saude: %s invalido\n", indiceLinhasReconhecidas, cns);
             }
 
             indiceLinhasReconhecidas++;
@@ -974,7 +974,7 @@ int ValidarIdade(gchar *arquivo) {
 
             if (!idadeValida) // Imprime apenas se a idade for inválida
             {
-                printf("linha: %d tem Idade %s inválida\n", indiceLinhasReconhecidas, idade);
+                printf("linha: %d tem Idade %s invalida\n", indiceLinhasReconhecidas, idade);
             }
 
             indiceLinhasReconhecidas++;
