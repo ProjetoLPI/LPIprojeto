@@ -18,8 +18,8 @@ int main() {
 
         if(n == 1){
 
-            const char *nomeArquivo = "RespostaFormulario1.csv";
-            ValidarCEP(nomeArquivo);
+            const char *nomeArquivo = "RespostaFormulario2.csv";
+            ValidarIdade(nomeArquivo);
 
         }
         else if(n == 2){

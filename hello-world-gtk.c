@@ -40,9 +40,9 @@ static void show_file_dialog(GtkWindow *parent_window) {
 
   // Cria o seletor de arquivos
   file_dialog = gtk_file_chooser_dialog_new(
-      "Select Files", parent_window, GTK_FILE_CHOOSER_ACTION_OPEN,
-      "_Cancel", GTK_RESPONSE_CANCEL,
-      "_Open", GTK_RESPONSE_ACCEPT,
+      "Selecione o arquivo CSV", parent_window, GTK_FILE_CHOOSER_ACTION_OPEN,
+      "_Cancelar", GTK_RESPONSE_CANCEL,
+      "_Abrir", GTK_RESPONSE_ACCEPT,
       NULL);
 
   gtk_window_set_transient_for(GTK_WINDOW(file_dialog), parent_window);
@@ -86,34 +86,49 @@ static void validarCEPbutton(GtkButton *button, gpointer user_data) {
 
 static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *window;
-  GtkWidget *box;
+  GtkWidget *grid;
   GtkWidget *button;
   GtkWidget *button2;
   GtkWidget *button3;
+  GtkWidget *imagemUpe;
+  GtkWidget *fixed;
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "ProjetoLPI");
-  gtk_window_set_default_size(GTK_WINDOW(window), 500, 400);
+  gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
+  gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
 
-  box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  gtk_window_set_child(GTK_WINDOW(window), box);
+  grid = gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid), FALSE); 
+  gtk_window_set_child(GTK_WINDOW(window), grid);
+
+ imagemUpe = gtk_image_new_from_file("/home/henriquessp/Desktop/LPI/projeto/imagemUpe.jpeg");
+ gtk_grid_attach(GTK_GRID(grid), imagemUpe, 0, 0, 3, 1);
 
   // Cria o botão para mostrar o seletor de arquivos
   button = gtk_button_new_with_label("Escolha o arquivo");
-  gtk_box_append(GTK_BOX(box), button);
-
-  // botão 2
+  gtk_grid_attach(GTK_GRID(grid), button, 0, 1, 1, 1);
+  
+  // botão 2 (validar campos nulos)
   button2 = gtk_button_new_with_label("Validar campos nulos");
-  gtk_box_append(GTK_BOX(box), button2);
+  gtk_grid_attach(GTK_GRID(grid), button2, 1, 1, 1, 1);
   g_signal_connect(button2, "clicked", G_CALLBACK(on_validate_button_clicked), NULL);
+  gtk_widget_hide(button2);
 
-  // botão 3
+  // botão 3 (validar cep)
   button3 = gtk_button_new_with_label("Validar CEP");
-  gtk_box_append(GTK_BOX(box), button3);
+  gtk_grid_attach(GTK_GRID(grid), button3, 2, 1, 1, 1);
   g_signal_connect(button3, "clicked", G_CALLBACK(validarCEPbutton), NULL);
+  gtk_widget_hide(button3);
 
   // Conecta o sinal "clicked" do GtkButton para abrir o seletor de arquivos
   g_signal_connect(button, "clicked", G_CALLBACK(show_file_dialog), window);
+
+  GtkCssProvider *cssProvider = gtk_css_provider_new();
+  gtk_css_provider_load_from_path(cssProvider, "style.css");
+  GdkDisplay *display = gdk_display_get_default();
+  gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
   gtk_window_present(GTK_WINDOW(window));
 }
