@@ -33,8 +33,6 @@ int VerificarDataHora2(const char *str)
 }
 
 
-
-
 // PODEMOS USAR COMO BASE PARA QUALQUER TIPO DE VALIDAÇÃO
 int ValidarNulo(gchar *arquivo)
 {
@@ -73,7 +71,7 @@ int ValidarNulo(gchar *arquivo)
         // Processo de extração de cada coluna
         int indiceColunas = 0;
         int dataReconhecida = 0;
-        int colunasNulas[100]; // Assumindo um máximo de 50 colunas
+        int colunasNulas[100]; // Assumindo um máximo de 100 colunas
         int nc = 0;
 
         // Verificar se a primeira coluna está no formato de data e hora
@@ -197,19 +195,19 @@ int EncontrarCEP(const char *arquivo) {
         return -1;
     }
 
-    // Looping to read lines
+    // Loop para ler as linhas
     while ((lendo = fgetc(arquivocsv)) != EOF) {
         int i = 0;
         indiceColunas--;
 
-        // Adding characters to the line buffer
+        // Adicionando caracteres ao buffer da linha
         while (lendo != '\n' && lendo != EOF) {
             linhasCsv[i++] = lendo;
             lendo = fgetc(arquivocsv);
         }
-        linhasCsv[i] = '\0';  // Null-terminating the string
+        linhasCsv[i] = '\0';  // Terminando a string com nulo
 
-        // Extracting columns
+        // Extraindo colunas
         if (!dataReconhecida) {
             char primeiraColuna[100];
             sscanf(linhasCsv, "%99[^;]", primeiraColuna);
@@ -219,27 +217,27 @@ int EncontrarCEP(const char *arquivo) {
             }
         }
 
-        // Processing columns if the date is recognized
+        // Processando colunas se a data for reconhecida
         if (dataReconhecida) {
             char colunasCsv[1024];
             int j = 0;
 
             for (int k = 0; k <= i; k++) {
-                // If delimiter ';' or end of line '\0' is found
+                // Se o delimitador ';' ou fim de linha '\0' for encontrado
                 if (linhasCsv[k] == ';' || linhasCsv[k] == '\0') {
-                    colunasCsv[j] = '\0';  // Null-terminating the string
+                    colunasCsv[j] = '\0';  // Terminando a string com nulo
 
-                    // Comparing strings ignoring special characters
+                    // Comparando strings ignorando caracteres especiais
                     if (strstr(colunasCsv, "CEP da Resid") != NULL) {
                         indiceCEP = indiceColunas;
                         fclose(arquivocsv);
                         return indiceCEP;  // Retornando o índice imediatamente ao encontrar
                     }
 
-                    j = 0;  // Reset for the next column
+                    j = 0;  // Reset para a próxima coluna
                     indiceColunas++;
                 } else {
-                    // Adding elements to the column buffer
+                    // Adicionando elementos ao buffer da coluna
                     colunasCsv[j++] = linhasCsv[k];
                 }
             }
@@ -248,8 +246,9 @@ int EncontrarCEP(const char *arquivo) {
 
     fclose(arquivocsv);
 
-    return indiceCEP;  // Return -1 if not found
+    return indiceCEP;  // Retornar -1 se não encontrado
 }
+
 
 
 
@@ -283,7 +282,7 @@ int ValidarCEP(gchar *arquivo)
     char lendo;
     char linhasCsv[10024];
     int indiceLinhas = 0;
-    int indiceLinhasReconhecidas = 0;
+    int indiceLinhasReconhecidas = 2;
 
     // Looping para percorrer as linhas
     while ((lendo = fgetc(arquivocsv)) != EOF)
@@ -297,6 +296,12 @@ int ValidarCEP(gchar *arquivo)
             lendo = fgetc(arquivocsv);
         }
         linhasCsv[i] = '\0'; // Caracter final de cada string
+
+        // Ignorar linhas vazias
+        if (i == 0)
+        {
+            continue;
+        }
 
         // Processo de extração de cada coluna
         int indiceColunas = 0;
@@ -348,7 +353,11 @@ int ValidarCEP(gchar *arquivo)
             {
                 printf("linha: %d tem CEP %s inválido\n", indiceLinhasReconhecidas, cep);
             }
-
+            else
+            {
+                printf("linha: %d tem CEP %s valido\n", indiceLinhasReconhecidas, cep);
+            }
+            
             indiceLinhasReconhecidas++;
         }
 
@@ -361,6 +370,7 @@ int ValidarCEP(gchar *arquivo)
 
     return 0;
 }
+
 
 
 
@@ -489,7 +499,7 @@ int ValidarProntuario(gchar *arquivo)
     char lendo;
     char linhasCsv[10024];
     int indiceLinhas = 0;
-    int indiceLinhasReconhecidas = 0;
+    int indiceLinhasReconhecidas = 1;
 
     // Looping para percorrer as linhas
     while ((lendo = fgetc(arquivocsv)) != EOF)
@@ -503,6 +513,12 @@ int ValidarProntuario(gchar *arquivo)
             lendo = fgetc(arquivocsv);
         }
         linhasCsv[i] = '\0'; // Caracter final de cada string
+
+        // Ignorar linhas vazias
+        if (i == 0)
+        {
+            continue;
+        }
 
         // Processo de extração de cada coluna
         int indiceColunas = 0;
@@ -522,7 +538,7 @@ int ValidarProntuario(gchar *arquivo)
         {
             char colunasCsv[1024];
             int j = 0;
-            char prontuario[20]; // Buffer para armazenar o CEP
+            char prontuario[20]; // Buffer para armazenar o número do prontuário
 
             for (int k = 0; k <= i; k++)
             {
@@ -531,9 +547,9 @@ int ValidarProntuario(gchar *arquivo)
                 {
                     colunasCsv[j] = '\0'; // Caracter final de cada string
 
-                    if (indiceColunas == indiceCep) //indice da coluna cep
+                    if (indiceColunas == indiceCep) // Indice da coluna de prontuário
                     {
-                        strcpy(prontuario, colunasCsv); // Copiar o CEP para o buffer
+                        strcpy(prontuario, colunasCsv); // Copiar o número do prontuário para o buffer
                         if (!validarProntuario(colunasCsv))
                         {
                             prontuarioValido = 0;
@@ -550,7 +566,7 @@ int ValidarProntuario(gchar *arquivo)
                 }
             }
 
-            if (!prontuarioValido) // Imprime apenas se o CEP for inválido
+            if (!prontuarioValido) // Imprime apenas se o número do prontuário for inválido
             {
                 printf("linha: %d tem Numero de Prontuario %s inválido\n", indiceLinhasReconhecidas, prontuario);
             }
@@ -703,7 +719,7 @@ int ValidarCNS(gchar *arquivo) {
     char lendo;
     char linhasCsv[10024];
     int indiceLinhas = 0;
-    int indiceLinhasReconhecidas = 0;
+    int indiceLinhasReconhecidas = 1;
 
     // Looping para percorrer as linhas
     while ((lendo = fgetc(arquivocsv)) != EOF) {
@@ -715,6 +731,11 @@ int ValidarCNS(gchar *arquivo) {
             lendo = fgetc(arquivocsv);
         }
         linhasCsv[i] = '\0'; // Caracter final de cada string
+
+        // Ignorar linhas vazias
+        if (i == 0) {
+            continue;
+        }
 
         // Processo de extração de cada coluna
         int indiceColunas = 0;
@@ -739,7 +760,7 @@ int ValidarCNS(gchar *arquivo) {
                 if (linhasCsv[k] == ';' || linhasCsv[k] == '\0') {
                     colunasCsv[j] = '\0'; // Caracter final de cada string
 
-                    if (indiceColunas == indiceCNS) { //indice da coluna cns
+                    if (indiceColunas == indiceCNS) { // Indice da coluna CNS
                         strcpy(cns, colunasCsv); // Copiar o CNS para o buffer
                         if (!validarCNS(colunasCsv)) {
                             cnsValido = 0;
@@ -755,9 +776,6 @@ int ValidarCNS(gchar *arquivo) {
             }
 
             if (!cnsValido) { // Imprime apenas se o CNS for inválido
-                // float cns1;
-                // cns1 = atof(cns);
-                // cns1 *= pow(10, 14);
                 printf("linha: %d tem Numero da Carteira Nacional de Saude: %s inválido\n", indiceLinhasReconhecidas, cns);
             }
 
@@ -773,6 +791,7 @@ int ValidarCNS(gchar *arquivo) {
 
     return 0;
 }
+
 
 
 //VALIDAÇÃO IDADE:
@@ -896,7 +915,7 @@ int ValidarIdade(gchar *arquivo) {
     char lendo;
     char linhasCsv[10024];
     int indiceLinhas = 0;
-    int indiceLinhasReconhecidas = 0;
+    int indiceLinhasReconhecidas = 1;
 
     // Looping para percorrer as linhas
     while ((lendo = fgetc(arquivocsv)) != EOF) {
@@ -908,6 +927,11 @@ int ValidarIdade(gchar *arquivo) {
             lendo = fgetc(arquivocsv);
         }
         linhasCsv[i] = '\0'; // Caracter final de cada string
+
+        // Ignorar linhas vazias
+        if (i == 0) {
+            continue;
+        }
 
         // Processo de extração de cada coluna
         int indiceColunas = 0;
@@ -965,5 +989,6 @@ int ValidarIdade(gchar *arquivo) {
 
     return 0;
 }
+
 
 
