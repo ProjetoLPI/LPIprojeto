@@ -13,14 +13,6 @@ GtkWidget *button3;
 GtkWidget *button4; 
 GtkWidget *button5; 
 GtkWidget *button6;
-GtkWidget *text_view;
-
-// Função para exibir mensagens no GtkTextView
-static void log_message(const gchar *message) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
-    gtk_text_buffer_insert_at_cursor(buffer, message, -1);
-    gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
-}
 
 // Função callback chamada ao escolher o arquivo
 static void on_file_chosen(GtkFileChooser *chooser, gint response_id) {
@@ -32,7 +24,6 @@ static void on_file_chosen(GtkFileChooser *chooser, gint response_id) {
                 if (arquivo)
                     g_free(arquivo);
                 arquivo = g_strdup(caminho);
-                log_message(g_strdup_printf("Arquivo selecionado: %s", arquivo));
 
                 // Mostrar os botões 2, 3, 4 e 5 apenas se o arquivo selecionado for um CSV
                 const char *file_extension = strrchr(caminho, '.');
@@ -88,9 +79,9 @@ static void show_file_dialog(GtkWindow *parent_window) {
 static void on_validate_button_clicked(GtkButton *button, gpointer user_data) {
     if (arquivo) {
         ValidarNulo(arquivo);
-        log_message("Validação de campos nulos realizada.");
+        g_print("Validação de campos nulos realizada.");
     } else {
-        log_message("Nenhum arquivo selecionado.");
+        g_print("Nenhum arquivo selecionado.");
     }
 }
 
@@ -98,9 +89,9 @@ static void on_validate_button_clicked(GtkButton *button, gpointer user_data) {
 static void validarCEPbutton(GtkButton *button, gpointer user_data) {
     if (arquivo) {
         ValidarCEP(arquivo);
-        log_message("Validação de CEP realizada.");
+        g_print("Validação de CEP realizada.");
     } else {
-        log_message("Nenhum arquivo selecionado.");
+        g_print("Nenhum arquivo selecionado.");
     }
 }
 
@@ -108,9 +99,9 @@ static void validarCEPbutton(GtkButton *button, gpointer user_data) {
 static void validarProntuariobutton(GtkButton *button, gpointer user_data) {
     if (arquivo) {
         ValidarProntuario(arquivo);
-        log_message("Validação de prontuário realizada.");
+        g_print("Validação de prontuário realizada.");
     } else {
-        log_message("Nenhum arquivo selecionado.");
+        g_print("Nenhum arquivo selecionado.");
     }
 }
 
@@ -118,9 +109,9 @@ static void validarProntuariobutton(GtkButton *button, gpointer user_data) {
 static void validarCNSbutton(GtkButton *button, gpointer user_data) {
     if (arquivo) {
         ValidarCNS(arquivo);
-        log_message("Validação de CNS realizada.");
+        g_print("Validação de CNS realizada.");
     } else {
-        log_message("Nenhum arquivo selecionado.");
+        g_print("Nenhum arquivo selecionado.");
     }
 }
 
@@ -128,9 +119,9 @@ static void validarCNSbutton(GtkButton *button, gpointer user_data) {
 static void validarIdadebutton(GtkButton *button, gpointer user_data) {
     if (arquivo) {
         ValidarIdade(arquivo);
-        log_message("Validação de idade realizada.");
+        g_print("Validação de idade realizada.");
     } else {
-        log_message("Nenhum arquivo selecionado.");
+        g_print("Nenhum arquivo selecionado.");
     }
 }
 
@@ -144,7 +135,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "Validador de formulários do CISAM");
-    gtk_window_set_default_size(GTK_WINDOW(window), 1200, 800);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 400);
     gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
 
     grid = gtk_grid_new();
@@ -184,17 +175,6 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_grid_attach(GTK_GRID(grid), button6, 1, 6, 1, 1);
     gtk_widget_set_visible(button6, FALSE);
 
-// Criação do GtkTextView para exibir mensagens
-    text_view = gtk_text_view_new();
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(text_view), FALSE);
-    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(text_view), GTK_WRAP_WORD);
-    
-    // Criação do GtkScrolledWindow
-    GtkWidget *scrolled_window = gtk_scrolled_window_new();
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), text_view);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
-    gtk_grid_attach(GTK_GRID(grid), scrolled_window, 2, 1, 1, 6);
 
 
     // Define que os botões devem se expandir e preencher as células
